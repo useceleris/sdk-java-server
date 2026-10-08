@@ -34,7 +34,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -44,7 +43,6 @@ import org.junit.jupiter.api.Timeout;
 @Tag("live")
 @Timeout(value = 3, unit = TimeUnit.MINUTES)
 class QualificationLiveTest {
-  private static final Pattern GENERATED_MESSAGE_ID = Pattern.compile("[0-9a-f]{32}");
 
   private static final Duration DELIVERY_TIMEOUT = Duration.ofSeconds(15);
 
@@ -162,6 +160,10 @@ class QualificationLiveTest {
     }
   } // end method enforcesTheTokensChannelRestriction
 
+  /**
+   * The message id is the caller's own, so this suite does not depend on how the client generates
+   * ids; the client's own suite checks those.
+   */
   @Test
   void roundTripsAPayloadWithItsIdAndNoSelfEcho() throws Exception {
     String reference = uniqueChannelReference("msg");
@@ -177,10 +179,13 @@ class QualificationLiveTest {
       receiver.segment("chat").subscribe();
       Thread.sleep(SUBSCRIPTION_SETTLE_MILLISECONDS);
 
-      published.publish("hello-서버".getBytes(StandardCharsets.UTF_8)).get(15, TimeUnit.SECONDS);
+      String messageId = reference + "_hello";
+      published
+          .publish("hello-서버".getBytes(StandardCharsets.UTF_8), messageId)
+          .get(15, TimeUnit.SECONDS);
       Delivery delivery = next(received, DELIVERY_TIMEOUT, "the cross-connection delivery");
 
-      assertTrue(GENERATED_MESSAGE_ID.matcher(delivery.metadata().messageId()).matches());
+      assertEquals(messageId, delivery.metadata().messageId());
       assertEquals("hello-서버", delivery.text());
       assertNull(echoes.poll(1_500, TimeUnit.MILLISECONDS), "echoed without allowEcho");
     }
