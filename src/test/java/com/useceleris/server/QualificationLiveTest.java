@@ -122,14 +122,15 @@ class QualificationLiveTest {
     }
   } // end method refusesAWrongSecretAndAnUnknownClientAsTransport
 
-  // D-001: the server accepts up to the observed 60-minute window against a documented 60-second
-  // intent; recorded, not relied upon.
+  // D-001: the server accepts a signed timestamp that is at most 60 seconds old and not in the
+  // future.
   @Test
-  void refusesExpiredAndFutureClocksInsideTheObservedWindow() throws Exception {
+  void refusesTimestampsOutsideTheSixtySecondWindow() throws Exception {
     String reference = uniqueChannelReference("window");
     Claims claims = allPermissionClaims(reference).build();
 
-    for (Duration offset : List.of(Duration.ofMinutes(-61), Duration.ofMinutes(5))) {
+    for (Duration offset :
+        List.of(Duration.ofSeconds(-61), Duration.ofMinutes(-59), Duration.ofMinutes(5))) {
       SignerOptions.Builder options =
           signerOptions().clock(Clock.offset(Clock.systemUTC(), offset));
 
@@ -138,13 +139,13 @@ class QualificationLiveTest {
       }
     }
 
-    SignerOptions.Builder stale =
-        signerOptions().clock(Clock.offset(Clock.systemUTC(), Duration.ofMinutes(-59)));
+    SignerOptions.Builder recent =
+        signerOptions().clock(Clock.offset(Clock.systemUTC(), Duration.ofSeconds(-30)));
 
-    try (Channel channel = connected(client(stale, fixedClaims(claims)), reference)) {
+    try (Channel channel = connected(client(recent, fixedClaims(claims)), reference)) {
       assertEquals(ChannelState.CONNECTED, channel.state());
     }
-  } // end method refusesExpiredAndFutureClocksInsideTheObservedWindow
+  } // end method refusesTimestampsOutsideTheSixtySecondWindow
 
   @Test
   void enforcesTheTokensChannelRestriction() throws Exception {
