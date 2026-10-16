@@ -6,7 +6,7 @@
 
   <groupId>com.useceleris</groupId>
   <artifactId>celeris-server</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>Celeris Java server</name>
@@ -40,9 +40,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Reproducible archives: every entry carries this timestamp. -->
-    <project.build.outputTimestamp>2026-10-04T00:00:00Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-16T02:56:12Z</project.build.outputTimestamp>
 
-    <celeris-client.version>0.1.0-SNAPSHOT</celeris-client.version>
+    <celeris-client.version>1.0.0</celeris-client.version>
     <junit.version>5.14.4</junit.version>
     <jackson.version>3.2.3</jackson.version>
     <errorprone.version>2.50.0</errorprone.version>
